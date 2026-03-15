@@ -8,7 +8,16 @@
 4. Интерактивный цикл общения с пользователем
 """
 
+# Подмена системного sqlite3 на pysqlite3 (нужно для ChromaDB на серверах со старым SQLite < 3.35)
+try:
+    import pysqlite3
+    import sys
+    sys.modules["sqlite3"] = pysqlite3
+except ImportError:
+    pass
+
 import os
+import sys
 import time
 from typing import Optional
 from dotenv import load_dotenv
@@ -289,7 +298,22 @@ def main():
         load_dotenv()
         telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
         
-        # Выбор режима работы
+        # Режим только Telegram (для развёртывания на сервере без интерактивного ввода)
+        if "--telegram" in sys.argv or os.getenv("RUN_TELEGRAM_BOT") == "1":
+            if not telegram_token:
+                print("❌ Ошибка: для режима --telegram нужен TELEGRAM_BOT_TOKEN в .env")
+                sys.exit(1)
+            print("\n🤖 ЗАПУСК TELEGRAM БОТА (режим сервера)")
+            bot = TelegramRAGBot(
+                token=telegram_token,
+                rag_assistant=rag_assistant,
+                cache=cache,
+                logger=logger
+            )
+            bot.run()
+            return
+        
+        # Выбор режима работы (интерактивный запуск)
         print("\n" + "=" * 70)
         print("ВЫБОР РЕЖИМА РАБОТЫ")
         print("=" * 70)

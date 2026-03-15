@@ -1,0 +1,15 @@
+[Unit]
+Description=RAG Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USER
+WorkingDirectory=/home/YOUR_USER/cursor-repo/5-7-new_version
+Environment="PATH=/home/YOUR_USER/cursor-repo/5-7-new_version/venv/bin"
+ExecStart=/home/YOUR_USER/cursor-repo/5-7-new_version/venv/bin/python main.py --telegram
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
